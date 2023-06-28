@@ -1,6 +1,7 @@
-import json
-import telebot
+import logging
+
 import requests
+import telebot
 
 from environs import Env
 
@@ -12,6 +13,9 @@ tg_bot_token_key = env.str('TG_BOT_TOKEN_KEY')
 dvmn_token = env.str('DVMN_TOKEN')
 bot = telebot.TeleBot(token=tg_bot_token_key)
 
+logging.basicConfig(filename="sample.log", level=logging.INFO)
+log = logging.getLogger("ex")
+
 
 @bot.message_handler(commands=['start'])
 def get_notification(message):
@@ -20,6 +24,9 @@ def get_notification(message):
     headers = {
         'Authorization': f'Token {dvmn_token}'
     }
+    bot.send_message(message.chat.id, f'Здравствуйте, {message.from_user.first_name}\n\n'
+                                      f'Вас приветствует notification_dwmn_bot. '
+                                      f'Как только ваша работа будет проверена я отправлю уведомление 😉')
     while True:
         try:
             payload = {
@@ -28,11 +35,10 @@ def get_notification(message):
             response = requests.get(url, headers=headers, params=payload, timeout=(5, 5))
             response.raise_for_status()
             timestamp = response.json()['timestamp_to_request']
-            print(json.dumps(response.json(), ensure_ascii=False, indent=2))
         except requests.exceptions.ReadTimeout:
-            print('Oops. Read timeout occured')
+            log.info('Oops. Read timeout occured')
         except requests.exceptions.ConnectionError:
-            print('Oops. Connection timeout occured!')
+            log.info('Oops. Connection timeout occured!')
         except KeyError:
             lesson_title = response.json()['new_attempts'][0]['lesson_title']
             lesson_url = response.json()['new_attempts'][0]['lesson_url']
@@ -51,4 +57,5 @@ def get_text(message):
     bot.delete_message(message.chat.id, message.message_id)
 
 
-bot.polling(none_stop=True, interval=1)
+if __name__ == "__main__":
+    bot.polling(none_stop=True, interval=1)
