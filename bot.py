@@ -53,7 +53,7 @@ def get_notification(message):
 
 
 @bot.message_handler()
-def get_text(message):
+def delete_text(message):
     bot.delete_message(message.chat.id, message.message_id)
 
 
