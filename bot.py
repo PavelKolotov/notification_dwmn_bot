@@ -58,4 +58,5 @@ def delete_text(message):
 
 
 if __name__ == "__main__":
-    bot.polling(none_stop=True, interval=1)
+    bot.infinity_polling()
+    
