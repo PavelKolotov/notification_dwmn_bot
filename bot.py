@@ -34,19 +34,20 @@ def get_notification(message):
             }
             response = requests.get(url, headers=headers, params=payload, timeout=(5, 5))
             response.raise_for_status()
-            timestamp = response.json()['timestamp_to_request']
+            notification = response.json()
+            timestamp = notification['timestamp_to_request']
         except requests.exceptions.ReadTimeout:
             log.info('Oops. Read timeout occured')
         except requests.exceptions.ConnectionError:
             log.info('Oops. Connection timeout occured!')
         except KeyError:
-            lesson_title = response.json()['new_attempts'][0]['lesson_title']
-            lesson_url = response.json()['new_attempts'][0]['lesson_url']
-            if response.json()['new_attempts'][0]['is_negative']:
+            lesson_title = notification['new_attempts'][0]['lesson_title']
+            lesson_url = notification['new_attempts'][0]['lesson_url']
+            if notification['new_attempts'][0]['is_negative']:
                 text = 'К сожалению, в работе нашлись ошибки.'
             else:
                 text = 'Преподователю все понравилось, можно приступать к следующему уроку!'
-            timestamp = response.json()['last_attempt_timestamp']
+            timestamp = notification['last_attempt_timestamp']
             bot.send_message(message.chat.id, f'У вас проверили работу \"{lesson_title}\"\n\n'
                                               f'{text}\n\n'
                                               f'{lesson_url}')
