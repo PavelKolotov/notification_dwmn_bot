@@ -36,29 +36,32 @@ def get_notification(message):
             payload = {
                 'timestamp': timestamp
             }
-            response = requests.get(url, headers=headers, params=payload, timeout=(5, 5))
+            response = requests.get(url, headers=headers, params=payload, timeout=(5, 240))
             response.raise_for_status()
+
             notification = response.json()
-            timestamp = notification['timestamp_to_request']
+            if notification['status'] == 'timeout':
+                timestamp = notification['timestamp_to_request']
+            else:
+                timestamp = notification['last_attempt_timestamp']
+                lesson_title = notification['new_attempts'][0]['lesson_title']
+                lesson_url = notification['new_attempts'][0]['lesson_url']
+                if notification['new_attempts'][0]['is_negative']:
+                    text = 'К сожалению, в работе нашлись ошибки.'
+                else:
+                    text = 'Преподователю все понравилось, можно приступать к следующему уроку!'
+                bot.send_message(message.chat.id, text=textwrap.dedent(f'''
+                                У вас проверили работу "{lesson_title}"
+
+                                {text}
+
+                                {lesson_url}
+                                '''))
+
         except requests.exceptions.ReadTimeout:
             log.info('Oops. Read timeout occured')
         except requests.exceptions.ConnectionError:
             log.info('Oops. Connection timeout occured!')
-        except KeyError:
-            lesson_title = notification['new_attempts'][0]['lesson_title']
-            lesson_url = notification['new_attempts'][0]['lesson_url']
-            if notification['new_attempts'][0]['is_negative']:
-                text = 'К сожалению, в работе нашлись ошибки.'
-            else:
-                text = 'Преподователю все понравилось, можно приступать к следующему уроку!'
-            timestamp = notification['last_attempt_timestamp']
-            bot.send_message(message.chat.id, text=textwrap.dedent(f'''
-                У вас проверили работу "{lesson_title}"
-                
-                {text}
-                
-                {lesson_url}
-                '''))
 
 
 @bot.message_handler()
