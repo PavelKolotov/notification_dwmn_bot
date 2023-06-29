@@ -1,5 +1,6 @@
 import logging
 import textwrap
+import time
 
 import requests
 import telebot
@@ -36,7 +37,7 @@ def get_notification(message):
             payload = {
                 'timestamp': timestamp
             }
-            response = requests.get(url, headers=headers, params=payload, timeout=(5, 240))
+            response = requests.get(url, headers=headers, params=payload, timeout=(5, 5))
             response.raise_for_status()
 
             notification = response.json()
@@ -62,6 +63,7 @@ def get_notification(message):
             log.info('Oops. Read timeout occured')
         except requests.exceptions.ConnectionError:
             log.info('Oops. Connection timeout occured!')
+            time.sleep(5)
 
 
 @bot.message_handler()
