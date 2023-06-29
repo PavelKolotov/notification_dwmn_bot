@@ -1,4 +1,5 @@
 import logging
+import textwrap
 
 import requests
 import telebot
@@ -24,9 +25,12 @@ def get_notification(message):
     headers = {
         'Authorization': f'Token {dvmn_token}'
     }
-    bot.send_message(message.chat.id, f'Здравствуйте, {message.from_user.first_name}\n\n'
-                                      f'Вас приветствует notification_dwmn_bot. '
-                                      f'Как только ваша работа будет проверена я отправлю уведомление 😉')
+
+    bot.send_message(message.chat.id, text=textwrap.dedent(f'''
+        Здравствуйте, {message.from_user.first_name}
+        Вас приветствует notification_dwmn_bot.
+        Как только ваша работа будет проверена я отправлю уведомление 😉
+        '''))
     while True:
         try:
             payload = {
@@ -48,9 +52,13 @@ def get_notification(message):
             else:
                 text = 'Преподователю все понравилось, можно приступать к следующему уроку!'
             timestamp = notification['last_attempt_timestamp']
-            bot.send_message(message.chat.id, f'У вас проверили работу \"{lesson_title}\"\n\n'
-                                              f'{text}\n\n'
-                                              f'{lesson_url}')
+            bot.send_message(message.chat.id, text=textwrap.dedent(f'''
+                У вас проверили работу "{lesson_title}"
+                
+                {text}
+                
+                {lesson_url}
+                '''))
 
 
 @bot.message_handler()
