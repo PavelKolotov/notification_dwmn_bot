@@ -9,12 +9,12 @@ from environs import Env
 env = Env()
 env.read_env()
 
+log = logging.getLogger("ex")
+
 tg_bot_token_key = env.str('TG_BOT_TOKEN_KEY')
 dvmn_token = env.str('DVMN_TOKEN')
 bot = telebot.TeleBot(token=tg_bot_token_key)
 
-logging.basicConfig(filename="sample.log", level=logging.INFO)
-log = logging.getLogger("ex")
 
 
 @bot.message_handler(commands=['start'])
@@ -58,5 +58,5 @@ def delete_text(message):
 
 
 if __name__ == "__main__":
+    logging.basicConfig(filename="sample.log", level=logging.INFO)
     bot.infinity_polling()
-    
