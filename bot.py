@@ -15,20 +15,18 @@ log = logging.getLogger("ex")
 
 tg_bot_token_key = env.str('TG_BOT_TOKEN_KEY')
 dvmn_token = env.str('DVMN_TOKEN')
+tg_user_id = env.int('TG_USER_ID')
 bot = telebot.TeleBot(token=tg_bot_token_key)
 
 
-
-@bot.message_handler(commands=['start'])
-def get_notification(message):
+def get_notification():
     url = 'https://dvmn.org/api/long_polling/'
     timestamp = ''
     headers = {
         'Authorization': f'Token {dvmn_token}'
     }
 
-    bot.send_message(message.chat.id, text=textwrap.dedent(f'''
-        Здравствуйте, {message.from_user.first_name}
+    bot.send_message(tg_user_id, text=textwrap.dedent(f'''
         Вас приветствует notification_dwmn_bot.
         Как только ваша работа будет проверена я отправлю уведомление 😉
         '''))
@@ -51,7 +49,7 @@ def get_notification(message):
                     text = 'К сожалению, в работе нашлись ошибки.'
                 else:
                     text = 'Преподователю все понравилось, можно приступать к следующему уроку!'
-                bot.send_message(message.chat.id, text=textwrap.dedent(f'''
+                bot.send_message(tg_user_id, text=textwrap.dedent(f'''
                                 У вас проверили работу "{lesson_title}"
 
                                 {text}
@@ -66,11 +64,6 @@ def get_notification(message):
             time.sleep(5)
 
 
-@bot.message_handler()
-def delete_text(message):
-    bot.delete_message(message.chat.id, message.message_id)
-
-
 if __name__ == "__main__":
     logging.basicConfig(filename="sample.log", level=logging.INFO)
-    bot.infinity_polling()
+    get_notification()
