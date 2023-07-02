@@ -8,18 +8,8 @@ import telebot
 from environs import Env
 
 
-env = Env()
-env.read_env()
 
-log = logging.getLogger("ex")
-
-tg_bot_token_key = env.str('TG_BOT_TOKEN_KEY')
-dvmn_token = env.str('DVMN_TOKEN')
-tg_user_id = env.int('TG_USER_ID')
-bot = telebot.TeleBot(token=tg_bot_token_key)
-
-
-def get_notification():
+def get_notification(tg_user_id, dvmn_token, bot):
     url = 'https://dvmn.org/api/long_polling/'
     timestamp = ''
     headers = {
@@ -65,5 +55,13 @@ def get_notification():
 
 
 if __name__ == "__main__":
+    env = Env()
+    env.read_env()
+    log = logging.getLogger("ex")
     logging.basicConfig(filename="sample.log", level=logging.INFO)
-    get_notification()
+    tg_bot_token_key = env.str('TG_BOT_TOKEN_KEY')
+    dvmn_token = env.str('DVMN_TOKEN')
+    tg_user_id = env.int('TG_USER_ID')
+    bot = telebot.TeleBot(token=tg_bot_token_key)
+
+    get_notification(tg_user_id, dvmn_token, bot)
