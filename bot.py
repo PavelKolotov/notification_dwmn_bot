@@ -8,7 +8,6 @@ import telebot
 from environs import Env
 
 
-
 def get_notification(tg_user_id, dvmn_token, bot):
     url = 'https://dvmn.org/api/long_polling/'
     timestamp = ''
@@ -20,6 +19,7 @@ def get_notification(tg_user_id, dvmn_token, bot):
         Вас приветствует notification_dwmn_bot.
         Как только ваша работа будет проверена я отправлю уведомление 😉
         '''))
+    log.info('bot started')
     while True:
         try:
             payload = {
