@@ -58,7 +58,7 @@ if __name__ == "__main__":
     env = Env()
     env.read_env()
     log = logging.getLogger("ex")
-    logging.basicConfig(filename="sample.log", level=logging.INFO)
+    logging.basicConfig(filename="sample.log", level=logging.DEBUG)
     tg_bot_token_key = env.str('TG_BOT_TOKEN_KEY')
     dvmn_token = env.str('DVMN_TOKEN')
     tg_user_id = env.int('TG_USER_ID')
