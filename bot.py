@@ -19,7 +19,6 @@ def get_notification(tg_user_id, dvmn_token, bot):
         Вас приветствует notification_dwmn_bot.
         Как только ваша работа будет проверена я отправлю уведомление 😉
         '''))
-    log.info('bot started')
     while True:
         try:
             payload = {
@@ -65,3 +64,4 @@ if __name__ == "__main__":
     bot = telebot.TeleBot(token=tg_bot_token_key)
 
     get_notification(tg_user_id, dvmn_token, bot)
+    logging.info('bot started')
