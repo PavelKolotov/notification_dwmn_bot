@@ -14,20 +14,19 @@ def get_notification(tg_user_id, dvmn_token, bot):
     headers = {
         'Authorization': f'Token {dvmn_token}'
     }
-
     bot.send_message(tg_user_id, text=textwrap.dedent(f'''
         Вас приветствует notification_dwmn_bot.
         Как только ваша работа будет проверена я отправлю уведомление 😉
         '''))
     logging.info('bot started')
+
     while True:
         try:
             payload = {
                 'timestamp': timestamp
             }
-            response = requests.get(url, headers=headers, params=payload, timeout=(5, 5))
+            response = requests.get(url, headers=headers, params=payload, timeout=100)
             response.raise_for_status()
-
             notification = response.json()
             if notification['status'] == 'timeout':
                 timestamp = notification['timestamp_to_request']
@@ -46,19 +45,17 @@ def get_notification(tg_user_id, dvmn_token, bot):
 
                                 {lesson_url}
                                 '''))
-
         except requests.exceptions.ReadTimeout:
-            log.info('Oops. Read timeout occured')
+            pass
         except requests.exceptions.ConnectionError:
-            log.info('Oops. Connection timeout occured!')
-            time.sleep(5)
+            logging.warning('ConnectionError')
+            time.sleep(30)
 
 
 if __name__ == "__main__":
     env = Env()
     env.read_env()
-    log = logging.getLogger("ex")
-    logging.basicConfig(filename="sample.log", level=logging.DEBUG)
+    logging.basicConfig(format='%(levelname)s %(message)s', level=logging.DEBUG)
     tg_bot_token_key = env.str('TG_BOT_TOKEN_KEY')
     dvmn_token = env.str('DVMN_TOKEN')
     tg_user_id = env.int('TG_USER_ID')
