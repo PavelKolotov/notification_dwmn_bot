@@ -24,6 +24,7 @@ pip install -r requirements.txt
 
 - `TG_BOT_TOKEN_KEY` — API ключ, который вы получаете пр создании бота в Telegram
 - `DVMN_TOKEN` —  ваш персональный токен с API Девмана
+- `TG_USER_ID` —  ваш телеграм ID
 
 ## Запуск скрипта
 
