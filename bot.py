@@ -6,25 +6,47 @@ import requests
 import telebot
 
 from environs import Env
+from telegram_handler import TelegramLoggingHandler
 
 
-def get_notification(tg_user_id, dvmn_token, bot):
+def configure_logging(tg_bot_token_key, tg_user_id):
+    telegram_log_handler = TelegramLoggingHandler(tg_bot_token_key, tg_user_id)
+    logging.basicConfig(
+        handlers=[telegram_log_handler],
+        level=logging.INFO,
+        format='%(asctime)s | %(levelname)s | %(name)s | %(message)s'
+    )
+    logger = logging.getLogger(__name__)
+    logger.info('bot started')
+    return logger
+
+
+def send_notification(bot, tg_user_id, lesson_title, lesson_url, is_negative):
+    if is_negative:
+        text = 'К сожалению, в работе нашлись ошибки.'
+    else:
+        text = 'Преподавателю все понравилось, можно приступать к следующему уроку!'
+    message = textwrap.dedent(f'''
+        У вас проверили работу "{lesson_title}"
+
+        {text}
+
+        {lesson_url}
+    ''')
+    bot.send_message(tg_user_id, text=message)
+
+
+def get_notification(tg_user_id, dvmn_token, bot, tg_bot_token_key):
     url = 'https://dvmn.org/api/long_polling/'
     timestamp = ''
     headers = {
         'Authorization': f'Token {dvmn_token}'
     }
-    bot.send_message(tg_user_id, text=textwrap.dedent(f'''
-        Вас приветствует notification_dwmn_bot.
-        Как только ваша работа будет проверена я отправлю уведомление 😉
-        '''))
-    logging.info('bot started')
+    logger = configure_logging(tg_bot_token_key, tg_user_id)
 
     while True:
         try:
-            payload = {
-                'timestamp': timestamp
-            }
+            payload = {'timestamp': timestamp}
             response = requests.get(url, headers=headers, params=payload, timeout=100)
             response.raise_for_status()
             notification = response.json()
@@ -32,34 +54,25 @@ def get_notification(tg_user_id, dvmn_token, bot):
                 timestamp = notification['timestamp_to_request']
             else:
                 timestamp = notification['last_attempt_timestamp']
-                lesson_title = notification['new_attempts'][0]['lesson_title']
-                lesson_url = notification['new_attempts'][0]['lesson_url']
-                if notification['new_attempts'][0]['is_negative']:
-                    text = 'К сожалению, в работе нашлись ошибки.'
-                else:
-                    text = 'Преподователю все понравилось, можно приступать к следующему уроку!'
-                bot.send_message(tg_user_id, text=textwrap.dedent(f'''
-                                У вас проверили работу "{lesson_title}"
-
-                                {text}
-
-                                {lesson_url}
-                                '''))
+                new_attempt = notification['new_attempts'][0]
+                send_notification(bot, tg_user_id, new_attempt['lesson_title'], new_attempt['lesson_url'], new_attempt['is_negative'])
         except requests.exceptions.ReadTimeout:
             pass
         except requests.exceptions.ConnectionError:
-            logging.warning('ConnectionError')
+            logger.error('ConnectionError')
             time.sleep(30)
 
 
-if __name__ == "__main__":
+def main():
     env = Env()
     env.read_env()
-    logging.basicConfig(format='%(levelname)s %(message)s', level=logging.DEBUG)
     tg_bot_token_key = env.str('TG_BOT_TOKEN_KEY')
     dvmn_token = env.str('DVMN_TOKEN')
     tg_user_id = env.int('TG_USER_ID')
     bot = telebot.TeleBot(token=tg_bot_token_key)
 
-    get_notification(tg_user_id, dvmn_token, bot)
+    get_notification(tg_user_id, dvmn_token, bot, tg_bot_token_key)
 
+
+if __name__ == "__main__":
+    main()

@@ -2,3 +2,4 @@ environs==9.5.0
 pyTelegramBotAPI==4.12.0
 python-dotenv==1.0.0
 requests==2.31.0
+telegram-handler==1.4.4
