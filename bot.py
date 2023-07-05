@@ -9,16 +9,7 @@ from environs import Env
 from telegram_handler import TelegramLoggingHandler
 
 
-def configure_logging(tg_bot_token_key, tg_user_id):
-    telegram_log_handler = TelegramLoggingHandler(tg_bot_token_key, tg_user_id)
-    logging.basicConfig(
-        handlers=[telegram_log_handler],
-        level=logging.INFO,
-        format='%(asctime)s | %(levelname)s | %(name)s | %(message)s'
-    )
-    logger = logging.getLogger(__name__)
-    logger.info('bot started')
-    return logger
+logger = logging.getLogger(__name__)
 
 
 def send_notification(bot, tg_user_id, lesson_title, lesson_url, is_negative):
@@ -36,13 +27,14 @@ def send_notification(bot, tg_user_id, lesson_title, lesson_url, is_negative):
     bot.send_message(tg_user_id, text=message)
 
 
-def get_notification(tg_user_id, dvmn_token, bot, tg_bot_token_key):
+def get_notification(tg_user_id, dvmn_token, bot):
     url = 'https://dvmn.org/api/long_polling/'
     timestamp = ''
     headers = {
         'Authorization': f'Token {dvmn_token}'
     }
-    logger = configure_logging(tg_bot_token_key, tg_user_id)
+
+    logger.info('bot started')
 
     while True:
         try:
@@ -70,8 +62,14 @@ def main():
     dvmn_token = env.str('DVMN_TOKEN')
     tg_user_id = env.int('TG_USER_ID')
     bot = telebot.TeleBot(token=tg_bot_token_key)
+    telegram_log_handler = TelegramLoggingHandler(tg_bot_token_key, tg_user_id)
+    logging.basicConfig(
+        handlers=[telegram_log_handler],
+        level=logging.INFO,
+        format='%(asctime)s | %(levelname)s | %(name)s | %(message)s'
+    )
 
-    get_notification(tg_user_id, dvmn_token, bot, tg_bot_token_key)
+    get_notification(tg_user_id, dvmn_token, bot)
 
 
 if __name__ == "__main__":
