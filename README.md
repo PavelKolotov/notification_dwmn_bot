@@ -28,9 +28,50 @@ pip install -r requirements.txt
 
 ## Запуск скрипта
 
-
 ```python bot.py```
 
+
+## Установка через Docker
+
+Необходимо установить [Docker](https://docs.docker.com/), для запуска на локальной машине [Docker Desktop](https://docs.docker.com/desktop/).
+
+Далее необходимо загрузить образ из [Docker Hub](https://hub.docker.com/):
+
+```
+docker pull pavelsk84/dvmn_notific_bot:latest
+```
+
+Для запуска образа понадобиться создать файл `.env`, его содержание описано выше.
+
+Далее, запускаем контейнер, указав путь до своего `.env`  файла:
+
+```
+docker run --env-file .env pavelsk84/dvmn_notific_bot
+```
+
+Посмотреть список запущенных контейнеров:
+
+```
+docker ps
+```
+
+Остановка работы контейнера:
+
+```
+docker stop <CONTAINER ID или NAMES>
+```
+
+Удаление контейнера:
+
+```
+docker rm <CONTAINER ID или NAMES>
+```
+
+Если вы хотите остановить и удалить контейнер в одной команде, вы можете использовать флаг -f:
+
+```
+docker rm -f <CONTAINER ID или NAMES>
+```
 
 ## Цели проекта
 
